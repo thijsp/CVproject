@@ -1,6 +1,10 @@
 from __future__ import division
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
+import seaborn as sns
+plt.style.use(['seaborn-white','seaborn-paper'])
+sns.set(font='serif')
 
 """
 Lecture: Active Shape Models
@@ -74,3 +78,12 @@ if __name__ == '__main__':
         landmarks_aligned[i] = transform(tooth_data)
 
     # PCA
+    for i,tooth_data in enumerate(landmarks_aligned):
+        tooth_data  = tooth_data.reshape(14, 80)
+        eigs, eigvs = cv2.PCACompute(tooth_data)
+        plt.bar(np.arange(eigs.shape[1]), eigs[0])
+        plt.xlabel("Principal Components")
+        plt.ylabel("Size")
+        plt.title("PCA Results")
+
+
