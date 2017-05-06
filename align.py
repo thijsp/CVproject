@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.image as mimpg
 import seaborn as sns
 plt.style.use(['seaborn-white','seaborn-paper'])
 sns.set(font='serif')
@@ -50,6 +51,27 @@ def get_parameters(mean_shape, example):
 
     return s, theta, x1, y1
 
+def plot_radiograph(radiograph_path, landmarks):
+    img = mimpg.imread(radiograph_path)
+    x_all = np.array([])
+    y_all = np.array([])
+    for i in range(landmarks.shape[0]):
+        x, y = zip(*zip(*landmarks[i]))
+        x_all = np.append(x_all, list(x))
+        y_all = np.append(y_all, list(y))
+
+    img_plot = plt.imshow(img)
+    plt.scatter(x_all, y_all)
+    plt.show()
+
+def plot_radiographs():
+    for i in range(1, 15):
+        if i < 10:
+            radiograph_path = 'Data/Radiographs/0' + str(i) + '.tif'
+        else:
+            radiograph_path = 'Data/Radiographs/' + str(i) + '.tif'
+        plot_radiograph(radiograph_path, landmarks[:, i-1, :, :])
+
 if __name__ == '__main__':
     # Load Data
     filename  = 'Data/Landmarks/original/landmarks'
@@ -69,6 +91,9 @@ if __name__ == '__main__':
                     count += 1
                 landmarks[j - 1, i - 1, 0, :] = x
                 landmarks[j - 1, i - 1, 1, :] = y
+
+    # plot the radiograph with landmarks on it
+    # plot_radiographs()
 
     # Procrustes Analysis
     shape             = landmarks.shape
