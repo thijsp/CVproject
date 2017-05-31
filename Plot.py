@@ -29,8 +29,6 @@ def plot_radiographs(landmarks):
             radiograph_path = 'Data/Radiographs/' + str(i) + '.tif'
         plot_radiograph(radiograph_path, landmarks[:, i - 1, :, :])
 
-def get_roi(radiograph)
-
 def plot_roi(radiograph_path, ptx, pty):
     img = mimpg.imread(radiograph_path)
     cv2.rectangle(img, ptx, pty, color=200, thickness=3)

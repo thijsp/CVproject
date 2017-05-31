@@ -64,6 +64,7 @@ def perform_pca(landmarks_aligned):
         plt.xlabel("Principal Components")
         plt.ylabel("Size")
         plt.title("PCA Results")
+        #plt.show()
     return eigs, eigvs
 
 
