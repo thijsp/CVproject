@@ -12,6 +12,9 @@ import cv2
     bilateral filter: http://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html#bilateralfilter
 """
 
+def get_roi(img):
+    roi = cv2.rectangle()
+
 
 def butterworth_lowpass(cutoff_freq=15, order=2, size=256):
     ar = np.arange(size//2, size//2, 1.0)
@@ -32,8 +35,12 @@ def inv_dft(f):
     return np.fft.ifft2(np.fft.ifftshift(f))
 
 
-def median_filter(img):
-    img_blur = cv2.medianBlur(img, 21)
+def median_filter(img, par):
+    img_blur = cv2.MedianBlur(img, par)
+    return img_blur
+
+def gauss_filter(img, par):
+    img_blur = cv2.GaussianBlur(img, ksize=(0,0), sigmaX=4, sigmaY=8)
     return img_blur
 
 
@@ -46,18 +53,55 @@ def scharr(img):
     return cv2.Scharr(img, ddepth=-1, dx=1, dy=0)
 
 
-def canny(img):
-    return cv2.Canny(img, 200, 255)
+def canny(img, low_thresh, high_thresh):
+    return cv2.Canny(img, low_thresh, high_thresh)
+
+def get_roi(img):
+    x1, y1, x2, y2 = [1200,  500, 1800,  1350]
+    img = img[y1:y2, x1:x2]
+    return img
+
+def adaptive_threshold(img):
+    return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 17, 2)
 
 
 
 if __name__ == '__main__':
     img = cv2.imread('Data/Radiographs/01.tif')
-    img_med = median_filter(img)
-    fshift = get_dft(img)
-    magnitude_spectrum = 20 * np.log(np.abs(fshift))
-    plt.subplot(121), plt.imshow(img, cmap='gray')
-    plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-    plt.subplot(122), plt.imshow(magnitude_spectrum, cmap='gray')
-    plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+    img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #print img_grey.shape
+    img_roi = get_roi(img_grey)
+
+    print img_roi.shape
+
+    print np.mean(np.std(img_roi, axis=0))
+    print np.mean(np.std(img_roi, axis=1))
+
+    img_med = gauss_filter(img_roi, 21)
+    plt.imshow(img_med, cmap='gray')
     plt.show()
+    # plt.subplot(211)
+    # plt.imshow(img_grey, cmap='gray')
+    # plt.subplot(212)
+    # plt.imshow(img_med, cmap='gray')
+    # plt.show()
+
+    #img_can = canny(img_med, 15, 40)
+    img_can = adaptive_threshold(img_med)
+    plt.imshow(img_can, cmap='gray')
+    plt.show()
+
+    # t = [25, 30, 35, 40, 50, 60, 70]
+    # for i in range(len(t)):
+    #     img_can = canny(img_grey, t[i], 2)
+    #     plt.imshow(img_can, cmap='gray')
+    #     plt.show()
+
+
+    #fshift = get_dft(img)
+    #magnitude_spectrum = 20 * np.log(np.abs(fshift))
+    #plt.subplot(121), plt.imshow(img, cmap='gray')
+    #plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+    #plt.subplot(122), plt.imshow(magnitude_spectrum, cmap='gray')
+    #plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+    #plt.show()

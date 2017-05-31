@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mimpg
 import seaborn as sns
+import numpy as np
+import cv2
 plt.style.use(['seaborn-white','seaborn-paper'])
 sns.set(font='serif')
 
@@ -26,3 +28,25 @@ def plot_radiographs(landmarks):
         else:
             radiograph_path = 'Data/Radiographs/' + str(i) + '.tif'
         plot_radiograph(radiograph_path, landmarks[:, i - 1, :, :])
+
+def get_roi(radiograph)
+
+def plot_roi(radiograph_path, ptx, pty):
+    img = mimpg.imread(radiograph_path)
+    cv2.rectangle(img, ptx, pty, color=200, thickness=3)
+    plt.imshow(img)
+    plt.show()
+
+def define_roi():
+    x1, y1, x2, y2 = [1200,  500, 1800,  1350]
+    for i in range(1, 15):
+        if i < 10:
+            radiograph_path = 'Data/Radiographs/0' + str(i) + '.tif'
+        else:
+            radiograph_path = 'Data/Radiographs/' + str(i) + '.tif'
+        plot_roi(radiograph_path, (x1,y1), (x2,y2))
+
+
+if __name__ == '__main__':
+    define_roi()
+    x1, y1, x2, y2 = [1292.85714286, 657.5, 1739.28571429, 1237.5]

@@ -66,3 +66,4 @@ def perform_pca(landmarks_aligned):
         plt.title("PCA Results")
     return eigs, eigvs
 
+
