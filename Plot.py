@@ -20,6 +20,10 @@ def plot_radiograph(radiograph_path, landmarks):
     plt.scatter(x_all, y_all)
     plt.show()
 
+def plot_image_gray(img):
+    plt.imshow(img, cmap='gray')
+    plt.show()
+
 
 def plot_radiographs(landmarks):
     for i in range(1, 15):

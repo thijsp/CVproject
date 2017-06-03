@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.image as mimpg
 
 
 def read_landmarks():
@@ -62,6 +63,15 @@ def read_landmark_incisor(landmark_number, incisor_number):
         landmarks[1, :] = y
     return landmarks.T
 
+
+def read_radiograph(rad_number):
+    radiograph_path = 'Data/Radiographs/'
+    if rad_number < 10:
+        radiograph_path = radiograph_path + str(rad_number) + '.tif'
+    else:
+        radiograph_path = radiograph_path + str(rad_number) + '.tif'
+    img = mimpg.imread(radiograph_path)
+    return img
 
 
 

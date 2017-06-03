@@ -36,7 +36,7 @@ def inv_dft(f):
 
 
 def median_filter(img, par):
-    img_blur = cv2.MedianBlur(img, par)
+    img_blur = cv2.medianBlur(img, par)
     return img_blur
 
 def gauss_filter(img, par):
@@ -44,8 +44,8 @@ def gauss_filter(img, par):
     return img_blur
 
 
-def bilateral_filter(img):
-    img_bi = cv2.bilateralFilter(src=img, d=15, sigmaColor=300, sigmaSpace=300)
+def bilateral_filter(img, d):
+    img_bi = cv2.bilateralFilter(src=img, d=9, sigmaColor=175, sigmaSpace=175)
     return img_bi
 
 
@@ -56,52 +56,89 @@ def scharr(img):
 def canny(img, low_thresh, high_thresh):
     return cv2.Canny(img, low_thresh, high_thresh)
 
+
 def get_roi(img):
     x1, y1, x2, y2 = [1200,  500, 1800,  1350]
     img = img[y1:y2, x1:x2]
     return img
 
+
 def adaptive_threshold(img):
-    return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 17, 2)
+    return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 25, 0.7)
 
 
+def sobel(img):
+    return cv2.Sobel(img, ddepth=-1, ksize=3, dx=2, dy=1)
+
+
+def histogram_eq(img):
+    return cv2.equalizeHist(img)
+
+
+def level_down(img):
+    return cv2.pyrDown(img)
+
+
+def gaussian_pyramid(img):
+    G = img.copy()
+    gpA = [G]
+    for k in xrange(6):
+        G = cv2.pyrDown(gpA[k])
+        gpA.append(G)
+    return gpA
+
+
+def laplacian_pyramid(img):
+    gpA = gaussian_pyramid(img)
+    lpA = [gpA[5]]
+    for i in xrange(5, 0, -1):
+        size = (gpA[i - 1].shape[1], gpA[i - 1].shape[0])
+        GE = cv2.pyrUp(gpA[i], dstsize=size)
+        L = cv2.subtract(gpA[i-1], GE)
+        lpA.append(L)
+    return lpA
+
+
+def reconstruct_laplacian(LS):
+    ls_ = LS[0]
+    for i in xrange(1, 6):
+        size = (LS[i].shape[1], LS[i].shape[0])
+        ls_ = cv2.pyrUp(ls_, dstsize=size)
+        ls_ = cv2.add(ls_, LS[i])
+    return ls_
 
 if __name__ == '__main__':
     img = cv2.imread('Data/Radiographs/01.tif')
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #print img_grey.shape
-    img_roi = get_roi(img_grey)
+    img = img_grey
 
-    print img_roi.shape
+    img_grey = get_roi(img_grey)
 
-    print np.mean(np.std(img_roi, axis=0))
-    print np.mean(np.std(img_roi, axis=1))
+    img = median_filter(img_grey, 17)
 
-    img_med = gauss_filter(img_roi, 21)
-    plt.imshow(img_med, cmap='gray')
-    plt.show()
-    # plt.subplot(211)
-    # plt.imshow(img_grey, cmap='gray')
-    # plt.subplot(212)
-    # plt.imshow(img_med, cmap='gray')
-    # plt.show()
+    LS = laplacian_pyramid(img)
 
-    #img_can = canny(img_med, 15, 40)
-    img_can = adaptive_threshold(img_med)
-    plt.imshow(img_can, cmap='gray')
+    plt.imshow(LS[3], cmap='gray')
     plt.show()
 
-    # t = [25, 30, 35, 40, 50, 60, 70]
-    # for i in range(len(t)):
-    #     img_can = canny(img_grey, t[i], 2)
-    #     plt.imshow(img_can, cmap='gray')
-    #     plt.show()
+    plt.imshow(sobel(LS[3]), cmap='gray')
+    plt.show()
 
 
-    #fshift = get_dft(img)
-    #magnitude_spectrum = 20 * np.log(np.abs(fshift))
-    #plt.subplot(121), plt.imshow(img, cmap='gray')
-    #plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-    #plt.subplot(122), plt.imshow(magnitude_spectrum, cmap='gray')
-    #plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-    #plt.show()
+    LS[1] = bilateral_filter(LS[1], 17)
+    LS[2] = histogram_eq(LS[2])
+    #LS[3] = histogram_eq(LS[3])
+    
+
+
+    img = reconstruct_laplacian(LS)
+
+    plt.imshow(sobel(img), cmap='gray')
+    plt.show()
+
+    plt.plot()
+    #plt.subplot(211)
+    #plt.imshow(img_grey, cmap='gray')
+    #plt.subplot(212)
+    plt.imshow(img, cmap='gray')
+    plt.show()
