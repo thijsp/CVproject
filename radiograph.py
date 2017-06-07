@@ -30,8 +30,13 @@ class Radiograph(object):
         lower = preprocessing.preprocess(lower)
         return upper, lower
 
+    def resize(self, width, height):
+        scale = min(float(width) / self.img.shape[1], float(height) / self.img.shape[0])
+        img = cv2.resize(self.img, (int(self.img.shape[1] * scale), int(self.img.shape[0] * scale)))
+        return Radiograph(img), scale
+
 
 if __name__ == '__main__':
     for i in range(1, 15):
         rg = Radiograph([i])
-        rg.get_jaws()
+        #rg.get_jaws()
