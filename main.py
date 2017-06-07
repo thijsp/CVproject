@@ -22,8 +22,12 @@ if __name__ == "__main__":
     mean, shapes = GPA(landmarks)
     model = ASM(mean, shapes)
 
-    imS = cv2.resize(img, (50, 50))
+    #img = cv2.resize(img, (50, 50))
+    #cv2.namedWindow('image', cv2.CV_WINDOW_AUTOSIZE)
+
     cv2.imshow('choose', img)
+    cv2.resizeWindow('image', 60,60)
+
     cv.SetMouseCallback('choose', click_center)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

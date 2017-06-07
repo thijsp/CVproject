@@ -107,6 +107,18 @@ def reconstruct_laplacian(LS):
         ls_ = cv2.add(ls_, LS[i])
     return ls_
 
+
+def preprocess(img):
+    LS = laplacian_pyramid(img)
+
+    LS[1] = bilateral_filter(LS[1], 17)
+    LS[2] = histogram_eq(LS[2])
+    # LS[3] = histogram_eq(LS[3])
+
+    img = reconstruct_laplacian(LS)
+    return img
+
+
 if __name__ == '__main__':
     img = cv2.imread('Data/Radiographs/01.tif')
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

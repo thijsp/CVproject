@@ -35,6 +35,7 @@ def plot_radiographs(landmarks):
 
 def plot_roi(radiograph_path, ptx, pty):
     img = mimpg.imread(radiograph_path)
+    print img.shape
     cv2.rectangle(img, ptx, pty, color=200, thickness=3)
     plt.imshow(img)
     plt.show()

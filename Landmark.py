@@ -59,6 +59,9 @@ class Landmark(object):
             points[i, :] = tmp[i, :].dot(rotation)
         return Landmark(points + m)
 
+    def get_landmarks(self):
+        return self.landmarks
+
 
 
 if __name__ == '__main__':

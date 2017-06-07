@@ -66,12 +66,14 @@ def get_mean_shape(shapes):
     return Landmark.Landmark(m)
 
 if __name__ == '__main__':
-    j = 3
-    landmarks = []
-    for i in np.arange(1, 15, 1):
-        landmarks.append(Landmark.Landmark([i, j]))
-    mean, shapes = GPA(landmarks)
-    mean = mean.to_vector()
+    #j = 3
     plt.figure()
-    plt.scatter(mean[:40], mean[40:])
+    for j in range(1, 9, 1):
+        landmarks = []
+        for i in np.arange(1, 15, 1):
+            landmarks.append(Landmark.Landmark([i, j]))
+        mean, shapes = GPA(landmarks)
+        mean = mean.to_vector()
+        plt.scatter(mean[:40], mean[40:])
     plt.show()
+
