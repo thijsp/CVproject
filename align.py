@@ -17,7 +17,7 @@ if __name__ == '__main__':
     landmarks = DataReader.read_landmarks()
 
     # plot the radiograph with landmarks on it
-    Plot.plot_radiographs(landmarks)
+    #Plot.plot_radiographs(landmarks)
 
     # Procrustes Analysis
     landmarks_aligned = Aligner.procrustes_analysis(landmarks)
