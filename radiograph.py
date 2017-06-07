@@ -28,17 +28,10 @@ class Radiograph(object):
         upper, lower = split.split(preprocessing.get_roi(self.to_gray().img))
         upper = preprocessing.preprocess(upper)
         lower = preprocessing.preprocess(lower)
-        plt.figure()
-        plt.subplot(211)
-        plt.imshow(upper, cmap='gray')
-        plt.subplot(212)
-        plt.imshow(lower, cmap='gray')
-        plt.show()
-
-        #split.split(preprocessing.preprocess(self.to_gray().img))
-
+        return upper, lower
 
 
 if __name__ == '__main__':
-    rg = Radiograph([1])
-    rg.get_jaws()
+    for i in range(1, 15):
+        rg = Radiograph([i])
+        rg.get_jaws()

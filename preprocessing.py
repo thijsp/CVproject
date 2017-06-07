@@ -120,7 +120,7 @@ def preprocess(img):
 
 
 if __name__ == '__main__':
-    img = cv2.imread('Data/Radiographs/01.tif')
+    img = cv2.imread('Data/Radiographs/11.tif')
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = img_grey
 
