@@ -1,6 +1,7 @@
 import numpy as np
 import DataReader
 import matplotlib.pyplot as plt
+import cv2
 
 
 class Landmark(object):
@@ -34,6 +35,10 @@ class Landmark(object):
         landmarks = self.landmarks - center
         landmark = Landmark(landmarks)
         return landmark
+
+    def transform_to_center(self, center):
+        landmark = self.landmarks + center
+        return Landmark(landmark)
 
     def to_vector(self):
         return np.hstack((self.landmarks[:, 0], self.landmarks[:, 1]))

@@ -67,7 +67,7 @@ def read_landmark_incisor(landmark_number, incisor_number):
 def read_radiograph(rad_number):
     radiograph_path = 'Data/Radiographs/'
     if rad_number < 10:
-        radiograph_path = radiograph_path + str(rad_number) + '.tif'
+        radiograph_path = radiograph_path + '0' + str(rad_number) + '.tif'
     else:
         radiograph_path = radiograph_path + str(rad_number) + '.tif'
     img = mimpg.imread(radiograph_path)

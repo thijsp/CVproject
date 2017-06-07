@@ -17,9 +17,12 @@ class ASM():
             self.eigvectors.append(eigvec[:, i])
             if sum(self.eigvals)/eigval.sum() > threshold:
                 break
+        n=[1200, 500, 1800, 1350]
+        self.mean_shape = mean_shape.to_vector()
 
-        self.mean_shape = mean_shape
 
-    def fit(self, img):
-        raise NotImplementedError
+    def fit_manual(self, img):
+
+
+        b = np.zeros((1,4))
         pos = self.mean_shape + np.dot(self.eigvectors, b)
