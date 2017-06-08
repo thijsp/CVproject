@@ -23,11 +23,11 @@ class Radiograph(object):
         return Radiograph(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY))
 
     def get_jaws(self):
-        plt.imshow(preprocessing.get_roi(self.to_gray().img), cmap='gray')
-        plt.show()
-        upper, lower = split.split(preprocessing.get_roi(self.to_gray().img))
-        upper = preprocessing.preprocess(upper)
-        lower = preprocessing.preprocess(lower)
+        img = preprocessing.get_roi(self.to_gray().img)
+        img = preprocessing.preprocess(img)
+        upper, lower = split.split(img)
+        #upper = preprocessing.preprocess(upper)
+        #lower = preprocessing.preprocess(lower)
         return upper, lower
 
     def resize(self, width, height):
@@ -39,4 +39,4 @@ class Radiograph(object):
 if __name__ == '__main__':
     for i in range(1, 15):
         rg = Radiograph([i])
-        #rg.get_jaws()
+        rg.get_jaws()
