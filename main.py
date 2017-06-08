@@ -7,13 +7,15 @@ import matplotlib.pyplot as plt
 import cv2
 import cv
 import radiograph
+import intitmanual
 
 
 
 
 def click_center(event, x, y, flags, param):
-    print x, y
-    return np.array([[x], [y]])
+    if event == cv2.EVENT_LBUTTONDOWN:
+        print x, y
+        return np.array([[x], [y]])
 
 if __name__ == "__main__":
 
@@ -30,13 +32,5 @@ if __name__ == "__main__":
     #img = cv2.resize(img, (50, 50))
     #cv2.namedWindow('image', cv2.CV_WINDOW_AUTOSIZE)
 
-    cv2.imshow('choose', img)
-    #cv2.resizeWindow('image', 60,60)
-    plt.show()
-
-    cv.SetMouseCallback('choose', click_center)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-    model.fit_manual(img, scale)
+    man = intitmanual.ManualInit(model, mean)
+    man.init_manual(img)
