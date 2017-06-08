@@ -15,10 +15,10 @@ def GPA(landmarks):
         next_mean_scaled = next_mean.transform_unit()
         next_mean = next_mean_scaled.transform_origin()
 
-        if ((next_mean.to_vector() - mean_shape.to_vector()) < 1e-10).all():
+        if ((next_mean.to_vector() - mean_shape.to_vector()) < 1e-8).all():
+            mean_shape = next_mean
             break
         mean_shape = next_mean
-
     return mean_shape, shapes
 
 
@@ -29,7 +29,7 @@ def align(example, mean_shape):
     example = example.scale(s)
     scale_fac = np.dot(example.to_vector(), mean_shape.to_vector())
     vec = example.to_vector()
-    return Landmark.Landmark(vec*(1.0/scale_fac))
+    return Landmark.Landmark(vec*(1.0/scale_fac), example.tooth_nb)
 
 
 def get_parameters(example, mean_shape):
@@ -63,7 +63,7 @@ def get_mean_shape(shapes):
         landmark_vec.append(shape.to_vector())
     landmark_vec = np.array(landmark_vec)
     m = np.mean(landmark_vec, axis=0)
-    return Landmark.Landmark(m)
+    return Landmark.Landmark(m, shapes[0].tooth_nb)
 
 if __name__ == '__main__':
     #j = 3
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     for j in range(1, 9, 1):
         landmarks = []
         for i in np.arange(1, 15, 1):
-            landmarks.append(Landmark.Landmark([i, j]))
+            landmarks.append(Landmark.Landmark([i, j], tooth_nb=j))
         mean, shapes = GPA(landmarks)
         mean = mean.to_vector()
         plt.scatter(mean[:40], mean[40:])

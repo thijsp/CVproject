@@ -12,9 +12,6 @@ import cv2
     bilateral filter: http://docs.opencv.org/2.4/modules/imgproc/doc/filtering.html#bilateralfilter
 """
 
-def get_roi(img):
-    roi = cv2.rectangle()
-
 
 def butterworth_lowpass(cutoff_freq=15, order=2, size=256):
     ar = np.arange(size//2, size//2, 1.0)
