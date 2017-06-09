@@ -2,6 +2,7 @@ import numpy as np
 import DataReader
 import matplotlib.pyplot as plt
 import cv2
+import radiograph
 
 
 class Landmark(object):
@@ -76,23 +77,51 @@ class Landmark(object):
     def get_norm(self):
         return np.linalg.norm(self.landmarks)
 
+    def translate_to_roi(self):
+        x1, y1, x2, y2 = [1200, 500, 1800, 1350]
+        return self.translate_axis(x1, y1)
+
+    def translate_jaw(self, jaw_split, b_size):
+        y = jaw_split - b_size
+        if self.tooth_nb < 4:
+            return self.translate_to_roi()
+        else:
+            return self.translate_to_roi().translate_axis(0, y)
+
+
+    def translate_axis(self, x, y):
+        landmarks = self.landmarks - [x, y]
+        return Landmark(landmarks, self.tooth_nb)
+
 
 
 if __name__ == '__main__':
-    landmark = Landmark([1, 1])
+    landmark = Landmark([13, 1], 1)
     l = landmark.to_vector()
     radiograph_path = 'Data/Radiographs/0' + str(1) + '.tif'
+    rg = radiograph.Radiograph([13])
 
-    img = plt.imread(radiograph_path)
-    plt.figure()
-    plt.imshow(img)
+    plt.imshow(rg.img, cmap='gray')
     plt.scatter(l[:40], l[40:])
     plt.show()
 
-    l = landmark.transform_origin().to_vector()
-    img = plt.imread(radiograph_path)
-    plt.figure()
-    plt.imshow(img)
+    l = landmark.translate_to_roi().to_vector()
+    roi = rg.roi
+    plt.imshow(roi, cmap='gray')
     plt.scatter(l[:40], l[40:])
     plt.show()
+
+    l = landmark.translate_jaw(rg.middle, rg.boundary_size).to_vector()
+    plt.imshow(rg.upper, cmap='gray')
+    plt.scatter(l[:40], l[40:])
+    plt.show()
+
+    landmark = Landmark([13, 6], 6)
+    l = landmark.translate_jaw(rg.middle, rg.boundary_size).to_vector()
+    plt.imshow(rg.lower, cmap='gray')
+    plt.scatter(l[:40], l[40:])
+    plt.show()
+
+
+
 

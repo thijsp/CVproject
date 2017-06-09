@@ -4,19 +4,19 @@ import radiograph
 import matplotlib.pyplot as plt
 
 
-def upper(radiograph, l):
-    return radiograph[:l, :]
+def upper(radiograph, l, b):
+    return radiograph[:l+b, :]
 
 
-def lower(radiograph, l):
-    return radiograph[l:, :]
+def lower(radiograph, l, b):
+    return radiograph[l-b:, :]
 
 
-def split(radiograph):
+def split(radiograph, boundary_size):
     #dst = cv2.reduce(radiograph, 0, cv2.cv.CV_REDUCE_SUM, dtype=cv2.CV_32S)
     #hist = cv2.calcHist(radiograph, [0], None, [256], [0, 256])
     l = middle_idx(radiograph)
-    return upper(radiograph, l), lower(radiograph, l)
+    return upper(radiograph, l, boundary_size), lower(radiograph, l, boundary_size), l
 
 
 def get_low_level(rg):

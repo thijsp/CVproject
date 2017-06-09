@@ -18,7 +18,8 @@ class Radiograph(object):
         #self.img = self.resize(1200, 800)
         self.img = self.to_gray()
         self.roi = preprocessing.get_roi(self.img)
-        self.upper, self.lower = self.get_jaws()
+        self.boundary_size = 100
+        self.upper, self.lower, self.middle = self.get_jaws(self.boundary_size)
 
     def show(self):
         print self.img.shape
@@ -27,13 +28,13 @@ class Radiograph(object):
     def to_gray(self):
         return cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
-    def get_jaws(self):
+    def get_jaws(self, boundary_size):
         img = self.roi
         img = preprocessing.preprocess(img)
-        upper, lower = split.split(img)
+        upper, lower, middle = split.split(img, boundary_size)
         #upper = preprocessing.preprocess(upper)
         #lower = preprocessing.preprocess(lower)
-        return upper, lower
+        return upper, lower, middle
 
     def resize(self, width, height):
         scale = min(float(width) / self.img.shape[1], float(height) / self.img.shape[0])
