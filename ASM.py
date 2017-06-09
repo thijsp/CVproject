@@ -73,10 +73,9 @@ class ASM(object):
 
         y = self.get_deviation(T, x)
         self.b = self.get_b(Q, y)
-        for i in range(1, 15):
-            reconstructed = self.reconstruct(self.aligned_shapes[i].to_vector(), self.b[i])
-            self.plot_reconstructed(self.aligned_shapes[i].to_vector(), reconstructed)
-        print('asgklj;')
+        #for i in range(1, 15):
+        #    reconstructed = self.reconstruct(self.aligned_shapes[i].to_vector(), self.b[i])
+        #    self.plot_reconstructed(self.aligned_shapes[i].to_vector(), reconstructed)
 
     def get_deviation(self, aligned, mean):
         T = aligned
