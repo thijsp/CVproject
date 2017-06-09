@@ -30,13 +30,16 @@ class ASM(object):
         eigval = eigval[idx]
         eigvec = eigvec[:, idx]
 
-        self.eigvals = []
-        self.eigvectors = []
+        eigvals = []
+        eigvectors = []
         for i, v in enumerate(eigval):
-            self.eigvals.append(v)
-            self.eigvectors.append(eigvec[:, i])
-            if sum(self.eigvals) / eigval.sum() > threshold:
+            eigvals.append(v)
+            eigvectors.append(eigvec[:, i])
+            if sum(eigvals) / eigval.sum() > threshold:
                 break
+
+        self.eigvals = np.array(eigvals)
+        self.eigvectors = np.array(eigvectors)
 
     def fit(self, rg, automatic):
         if automatic:
@@ -63,25 +66,35 @@ class ASM(object):
         T = self.aligned_shapes
         x = self.mean_shape.to_vector()
         y = np.array([t.to_vector() - x for t in T])
+        Q = self.eigvectors
+        #Q = np.dot(np.diag(self.eigvals), self.eigvectors)
 
         #nb_comp = 3 -> 99%
-        pca = PCA(n_components=3, svd_solver='arpack')
 
-        U, S, V = pca._fit(self.aligned_shapes)
         y = self.get_deviation(T, x)
-
-        S = self.regularisation(S)
-
-        k = np.dot(V, np.dot(U.T, y).T)
-        self.c = np.dot(k, np.linalg.inv(S))
-
-    def regularisation(self, S):
-        pass
+        self.b = self.get_b(Q, y)
+        for i in range(1, 15):
+            reconstructed = self.reconstruct(self.aligned_shapes[i].to_vector(), self.b[i])
+            self.plot_reconstructed(self.aligned_shapes[i].to_vector(), reconstructed)
+        print('asgklj;')
 
     def get_deviation(self, aligned, mean):
         T = aligned
         x = mean
-        y = np.array([np.power(t.to_vector() - x, 2) for t in T])
-        y = np.sum(y, axis=0)
 
+        #y = np.array([np.power(t.to_vector() - x, 2) for t in T])
+        return np.array([t.to_vector() - x for t in T])
+        #return np.sum(y, axis=0)
 
+    def get_b(self, Q, y):
+        pca = PCA(n_components=Q.shape[0], svd_solver='full')
+        U, S, V = pca._fit(Q)
+        return np.array([np.dot(np.dot(np.dot(V.T, np.diag(S)), U.T).T, diff) for diff in y])
+
+    def reconstruct(self, shape, b):
+        return self.mean_shape.to_vector() + np.dot(self.eigvectors.T, b)
+
+    def plot_reconstructed(self, tooth, reconstructed):
+        plt.scatter(tooth[:40], tooth[40:])
+        plt.scatter(reconstructed[:40], reconstructed[40:])
+        plt.show()
