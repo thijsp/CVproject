@@ -115,7 +115,7 @@ class ASM(object):
         return landmark
 
     def constraint_b(self, b):
-        constraints = 1.96 * np.sqrt(self.eigvals)
+        constraints = 1.2 * np.sqrt(self.eigvals)
         abs_b = np.abs(b)
         abs_const = np.abs(constraints)
         signs = np.sign(b)

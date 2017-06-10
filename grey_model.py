@@ -8,7 +8,7 @@ import line_iterator
 
 class GreyLevel(object):
 
-    def __init__(self, landmarks, radiographs, nb_pixels=8):
+    def __init__(self, landmarks, radiographs, nb_pixels=10):
         self.landmarks = landmarks
         self.rgs = radiographs
         self.nb_pixels = nb_pixels
@@ -49,30 +49,40 @@ class GreyLevel(object):
 
     def fit_profile(self, estimate, rg):
         _, jaw = self.get_example(estimate, rg)
-        g_s = self.get_sample(estimate, jaw, self.nb_pixels+10)
+        g_s = self.get_sample(estimate, jaw, 2*self.nb_pixels)
         f = []
         for i in range(g_s.shape[0]):
-            f.append(self.best_fit(g_s[i], i))
+            f.append(self.best_fit(g_s[i], i, estimate))
         return Landmark.Landmark(np.array(f), estimate.tooth_nb)
 
-    def best_fit(self, points, landmark_idx):
+    def best_fit(self, points, landmark_idx, estimate):
         fit = []
         k = self.nb_pixels
         m =  (len(points)-1)/2
         ins = points[:, 2]
         for i in np.arange(k, 2*m+1-k, 1):
-            fit.append(self.get_sample_fit(ins[i-k:i+k+1], landmark_idx))
+            fit.append(self.get_sample_fit(points[i-k:i+k+1], landmark_idx, estimate.landmarks[landmark_idx, :]))
         fit = np.array(fit)
         best = np.argmin(fit)
         best_coord = points[best, 0:2]
         return best_coord
 
-    def get_sample_fit(self, g_s, landmark_idx):
+    def get_sample_fit(self, g_s, landmark_idx, point):
+        distance = self.get_distance(point, g_s)
+        g_s = g_s[:, 2]
         i_2 = g_s - self.model_mu[landmark_idx]
         i_1 = i_2.T
         inv_cov = np.linalg.inv(self.model_cov[landmark_idx])
         f_gs = np.dot(np.dot(i_1, inv_cov), i_2)
+        if distance > 10:
+            f_gs = float('inf')
+
         return f_gs
+
+    def get_distance(self, point, candidates):
+        nb = candidates.shape[0] // 2 + 1
+        dist = np.sqrt((candidates[nb, 0] - point[0]) ** 2 + (candidates[nb, 1] - point[1]) ** 2)
+        return dist
 
 
 if __name__ == '__main__':

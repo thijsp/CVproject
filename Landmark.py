@@ -42,9 +42,7 @@ class Landmark(object):
         return landmark
 
     def transform_to_point(self, point):
-        landmarks = self.landmarks + point
-        landmark = Landmark(landmarks, self.tooth_nb)
-        return landmark
+        return self.transform_to_center(point)
 
     def transform_to_center(self, center):
         #landmark = self.landmarks + center
@@ -63,9 +61,9 @@ class Landmark(object):
 
     def scale(self, s):
         m = self.get_mean()
-        #centered = self.landmarks - m
-        centered = self.landmarks
-        points = centered.dot(s) #+ m
+        centered = self.landmarks - m
+        #centered = self.landmarks
+        points = centered.dot(s) + m
         return Landmark(points, self.tooth_nb)
 
     def rotate(self, theta):
@@ -73,11 +71,11 @@ class Landmark(object):
         m = self.get_mean()
         rotation = np.array([[np.cos(theta), np.sin(theta)],
                            [-np.sin(theta), np.cos(theta)]])
-        #tmp = self.landmarks - m
-        tmp = self.landmarks
+        tmp = self.landmarks - m
+        #tmp = self.landmarks
         for i in range(len(self.landmarks)):
             points[i, :] = tmp[i, :].dot(rotation)
-        return Landmark(points, self.tooth_nb )#+ m)
+        return Landmark(points + m, self.tooth_nb)
 
     def get_landmarks(self):
         return self.landmarks
@@ -106,17 +104,27 @@ class Landmark(object):
             _, axis = plt.subplots()
         axis.scatter(self.landmarks[:, 0], self.landmarks[:, 1])
 
+    def no_root(self):
+        points = self.landmarks[10:30,:]
+        return Landmark(points, self.tooth_nb)
+        #plt.scatter(self.landmarks[10:30, 0], self.landmarks[10:30, 1], color='red')
+        #plt.show()
+
 
 
 
 if __name__ == '__main__':
-    landmark = Landmark([13, 1], 1)
+    landmark = Landmark([13, 3], 3)
     l = landmark.to_vector()
     radiograph_path = 'Data/Radiographs/0' + str(1) + '.tif'
     rg = radiograph.Radiograph([13])
 
+    landmark.no_root()
+
+    fig, ax = plt.subplots()
     plt.imshow(rg.img, cmap='gray')
-    plt.scatter(l[:40], l[40:])
+    landmark.no_root().plot(ax)
+    #plt.scatter(l[:40], l[40:])
     plt.show()
 
     l = landmark.translate_to_roi().to_vector()

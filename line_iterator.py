@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 
 
 def get_derivates(a, centre, img, nb_pixels):
-    values = get_intensities(a, centre, img, 2*nb_pixels+3)
+    values = get_intensities(a, centre, img, nb_pixels)
     ins = values[:, 2]
-    d1 = ins[1:]-ins[:-1]
-    d2 = ins[:-1] - ins[1:]
-    g = d1-d2
-    g = g[:-1]
+    g = ins[1:-1]
+    #d1 = ins[1:]-ins[:-1]
+    #d2 = ins[:-1] - ins[1:]
+    #g = d1-d2
+    #g = g[:-1]
     norm = np.sum(np.abs(g))
     g = g / norm
     values = values[1:-1]
@@ -20,7 +21,7 @@ def get_intensities(a_normal, centre, img, nb_pixels):
     x_c, y_c = centre
     a = a_normal
     theta = np.arctan(a)
-    dist = nb_pixels
+    dist = 3.0*nb_pixels
     x_d = np.cos(theta) * dist
     y_d = np.sin(theta) * dist
     x_1 = x_d + x_c
@@ -28,17 +29,28 @@ def get_intensities(a_normal, centre, img, nb_pixels):
     x_2 = x_c - x_d
     y_2 = y_c - y_d
 
-    intensities = createLineIterator([x_1, y_1], [x_2, y_2], img)
-    ins = filter(intensities, nb_pixels)
+    #intensities = createLineIterator([x_1, y_1], [x_2, y_2], img)
+    intensities1 = createLineIterator(centre, [x_1, y_1],  img)
+    intensities2 = createLineIterator(centre, [x_2, y_2], img)
+    ins1 = filter(intensities1, nb_pixels+1)
+    ins2 = filter(intensities2, nb_pixels+1)
+    ins_c = np.array([[centre[0], centre[1], img[int(centre[1]), int(centre[0])]]])
+    ins = np.vstack((ins1, ins_c, ins2))
     return ins
 
 def filter(intensities, nb_pixels):
     nb_del = len(intensities) - nb_pixels
-    del_s = int(nb_del/2)
-    ins = intensities[del_s:-del_s, :]
-    if len(ins) > nb_pixels:
-        ins = ins[:-1]
-    return ins
+    del_s = int(nb_del)
+    return intensities[:-del_s]
+
+
+# def filter(intensities, nb_pixels):
+#     nb_del = len(intensities) - nb_pixels
+#     del_s = int(nb_del/2)
+#     ins = intensities[del_s:-del_s, :]
+#     if len(ins) > nb_pixels:
+#         ins = ins[:-1]
+#     return ins
 
 
 def createLineIterator(P1, P2, img):

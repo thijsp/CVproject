@@ -29,22 +29,23 @@ class ManualInit(object):
         cv2.destroyAllWindows()
 
         # plot the result of the click
-        img = self.plot_result(img, scale)
-        return self.center, scale, 0, Landmark.Landmark(img, self.mean_shape.tooth_nb)
+        landmark = self.plot_result(img, scale)
+        return self.center, scale, 0, landmark
 
 
     def plot_result(self, img, scale):
         mean_shape = self.mean_shape.transform_unit()
         mean_shape = mean_shape.scale(scale)
-        mean_shape = mean_shape.transform_to_center(self.center)
-        points = mean_shape.landmarks
+        new_shape = mean_shape.transform_to_center(self.center)
+        points = new_shape.landmarks
         pimg = np.array([(int(p[0]), int(p[1])) for p in points])
+        new_shape = Landmark.Landmark(pimg, mean_shape.tooth_nb)
 
         plt.imshow(img, cmap='gray')
         cv2.polylines(img, [pimg], True, (0, 255, 0))
         plt.show()
 
-        return pimg
+        return new_shape
 
     def get_img(self, rg):
         return rg.get_tooth_img(self.tooth_nb)

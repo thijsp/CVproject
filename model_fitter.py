@@ -23,7 +23,7 @@ class Fitter(object):
         estimate = landmark
         while True:
             next_landmark = self.asm.search_profile(estimate, self.rg)
-            t, s, theta, b_next = self.calculate_b(next_landmark)
+            _, s, theta, b_next = self.calculate_b(next_landmark)
 
             if (b_next - b < 10 ** (-8)).all():
                 b = b_next
@@ -33,7 +33,7 @@ class Fitter(object):
                 estimate = Landmark.Landmark(self.asm.reconstruct(b)[0], self.asm.tooth_nb)
                 estimate_new = self.project(t, s, theta, estimate)
                 _, ax = plt.subplots()
-                ax.imshow(self.rg.upper, cmap='gray')
+                ax.imshow(self.rg.lower, cmap='gray')
                 estimate.plot(ax)
                 estimate_new.plot(ax)
                 plt.show()
@@ -43,16 +43,20 @@ class Fitter(object):
     def calculate_b(self, estimate):
         estimate_org = estimate.transform_origin()
         t, s, theta = ProcustesAnalysis.get_parameters(estimate_org, self.asm.mean_shape)
+        print (t, s, theta)
         proj_landmark = self.project(t, s, theta, estimate_org)
         tangent_landmark = self.tangent(proj_landmark, self.asm.mean_shape)
         b_next = self.asm.estimate_model_params(tangent_landmark)
-        t, s, theta = ProcustesAnalysis.get_parameters(self.asm.mean_shape, estimate_org)
+        t_m, s, theta = ProcustesAnalysis.get_parameters(self.asm.mean_shape, estimate_org)
+        #print self.asm.mean_shape.get_center()
+        #print t
         t = estimate.get_center()
-        return t, s, theta, b_next
+        print (t, s, theta)
+        return t + t_m, s, theta, b_next
 
     def project(self, t, s, theta, estimate):
-        estimate = estimate.rotate(theta)
         estimate = estimate.scale(s)
+        estimate = estimate.rotate(theta)
         estimate = estimate.transform_to_point(t)
         #scale_fac = np.dot(estimate.to_vector(), self.asm.mean_shape.to_vector())
         vec = estimate.to_vector()
@@ -65,7 +69,7 @@ class Fitter(object):
 
 
 if __name__ == '__main__':
-    j = 1
+    j = 6
     landmarks = []
     rgs = []
     for i in np.arange(1, 15, 1):
