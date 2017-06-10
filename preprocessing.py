@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mimpg
 from scipy import signal
 import cv2
+from scipy.ndimage import morphology
 
 """Implementation of filters to preprocess the radiographs
     http://www.ijcst.com/vol24/2/vijaykumari.pdf
@@ -36,12 +37,12 @@ def median_filter(img, par):
     img_blur = cv2.medianBlur(img, par)
     return img_blur
 
-def gauss_filter(img, par):
+def gauss_filter(img):
     img_blur = cv2.GaussianBlur(img, ksize=(0,0), sigmaX=4, sigmaY=8)
     return img_blur
 
 
-def bilateral_filter(img, d):
+def bilateral_filter(img):
     img_bi = cv2.bilateralFilter(src=img, d=9, sigmaColor=175, sigmaSpace=175)
     return img_bi
 
@@ -75,6 +76,10 @@ def histogram_eq(img):
 def level_down(img):
     return cv2.pyrDown(img)
 
+def clahe(img):
+    clahe = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(16, 16))
+    return clahe.apply(img)
+
 
 def gaussian_pyramid(img):
     G = img.copy()
@@ -106,48 +111,85 @@ def reconstruct_laplacian(LS):
 
 
 def preprocess(img):
+    img = bilateral_filter(img)
+    #img = gauss_filter(img)
+    #LS = laplacian_pyramid(img)
+    #LS[3][LS[3] > 1] = 255
+    #img = scharr(LS[3])
+
+    img_top = morphology.white_tophat(img, size=100)
+    img_bottom = morphology.black_tophat(img, size=80)
+    #LS[1] = bilateral_filter(LS[1])
+    # LS[2] = histogram_eq(LS[2])
+    #LS[3] = histogram_eq(LS[3])
+
+    img = cv2.add(img, img_top)
+    img = cv2.subtract(img, img_bottom)
+
+    img = clahe(img)
+    img = togradient_sobel(img)
+
+    #img = canny(img, 50, 60)
+
+    #LS = laplacian_pyramid(img)
+    #img = reconstruct_laplacian(LS)
+    # LS = laplacian_pyramid(img)
+    # img = LS[3]
+    return img
+
+def split_processing(img):
     LS = laplacian_pyramid(img)
 
-    LS[1] = bilateral_filter(LS[1], 17)
-    LS[2] = histogram_eq(LS[2])
-    # LS[3] = histogram_eq(LS[3])
+    LS[1] = bilateral_filter(LS[1])
+    # LS[2] = histogram_eq(LS[2])
+    LS[3] = histogram_eq(LS[3])
 
     img = reconstruct_laplacian(LS)
+    # LS = laplacian_pyramid(img)
+    # img = LS[3]
     return img
+
+def togradient_sobel(img):
+    """Applies the Sobel Operator.
+    Args:
+        img: A grayscale dental x-ray image.
+    Returns:
+        An image with the detected edges bright on a darker background.
+    """
+    img = cv2.GaussianBlur(img,(3,3),0)
+    sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+    abs_grad_x = cv2.convertScaleAbs(sobelx)
+    abs_grad_y = cv2.convertScaleAbs(sobely)
+    return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
 
 
 if __name__ == '__main__':
-    img = cv2.imread('Data/Radiographs/11.tif')
+    img = cv2.imread('Data/Radiographs/01.tif')
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = img_grey
 
     img_grey = get_roi(img_grey)
 
-    img = median_filter(img_grey, 17)
+    img = median_filter(img_grey, 7)
 
     LS = laplacian_pyramid(img)
 
     plt.imshow(LS[3], cmap='gray')
     plt.show()
 
-    plt.imshow(sobel(LS[3]), cmap='gray')
-    plt.show()
-
 
     LS[1] = bilateral_filter(LS[1], 17)
-    LS[2] = histogram_eq(LS[2])
-    #LS[3] = histogram_eq(LS[3])
+    #LS[2] = histogram_eq(LS[2])
+    LS[3] = histogram_eq(LS[3])
     
 
 
     img = reconstruct_laplacian(LS)
+    LS = laplacian_pyramid(img)
 
-    plt.imshow(sobel(img), cmap='gray')
-    plt.show()
+    img = LS[3]
 
-    plt.plot()
-    #plt.subplot(211)
-    #plt.imshow(img_grey, cmap='gray')
-    #plt.subplot(212)
+
     plt.imshow(img, cmap='gray')
     plt.show()

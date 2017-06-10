@@ -21,9 +21,10 @@ class Landmark(object):
         self.tooth_nb = tooth_nb
 
     def get_center(self):
-        x_center = self.landmarks[:, 0].min() + (self.landmarks[:, 0].max() - self.landmarks[:, 0].min())/2
-        y_center = self.landmarks[:, 1].min() + (self.landmarks[:, 1].max() - self.landmarks[:, 1].min())/2
-        return [x_center, y_center]
+        #x_center = self.landmarks[:, 0].min() + (self.landmarks[:, 0].max() - self.landmarks[:, 0].min())/2
+        #y_center = self.landmarks[:, 1].min() + (self.landmarks[:, 1].max() - self.landmarks[:, 1].min())/2
+        x_center, y_center = np.mean(self.landmarks, axis=0)
+        return np.array([x_center, y_center])
 
     def get_mean(self):
         return np.mean(self.landmarks, axis=0)
@@ -33,8 +34,15 @@ class Landmark(object):
         return Landmark(landmarks, self.tooth_nb)
 
     def transform_origin(self):
-        center = self.get_center()
+
+        #center = self.get_center()
+        center = np.mean(self.landmarks, axis=0)
         landmarks = self.landmarks - center
+        landmark = Landmark(landmarks, self.tooth_nb)
+        return landmark
+
+    def transform_to_point(self, point):
+        landmarks = self.landmarks + point
         landmark = Landmark(landmarks, self.tooth_nb)
         return landmark
 
@@ -92,6 +100,12 @@ class Landmark(object):
     def translate_axis(self, x, y):
         landmarks = self.landmarks - [x, y]
         return Landmark(landmarks, self.tooth_nb)
+
+    def plot(self, axis):
+        if axis is None:
+            _, axis = plt.subplots()
+        axis.scatter(self.landmarks[:, 0], self.landmarks[:, 1])
+
 
 
 

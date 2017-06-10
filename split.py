@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import radiograph
 import matplotlib.pyplot as plt
+import preprocessing
 
 
 def upper(radiograph, l, b):
@@ -15,7 +16,8 @@ def lower(radiograph, l, b):
 def split(radiograph, boundary_size):
     #dst = cv2.reduce(radiograph, 0, cv2.cv.CV_REDUCE_SUM, dtype=cv2.CV_32S)
     #hist = cv2.calcHist(radiograph, [0], None, [256], [0, 256])
-    l = middle_idx(radiograph)
+    pre_img = preprocessing.split_processing(radiograph)
+    l = middle_idx(pre_img)
     return upper(radiograph, l, boundary_size), lower(radiograph, l, boundary_size), l
 
 

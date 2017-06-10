@@ -7,17 +7,18 @@ import preprocessing
 
 class ManualInit(object):
 
-    def __init__(self, asm, mean_shape, tooth_nb):
+    def __init__(self, asm):
         self.asm = asm
-        self.mean_shape = mean_shape
-        self.tooth_nb = tooth_nb
+        self.mean_shape = asm.mean_shape
+        self.tooth_nb = asm.tooth_nb
 
     def __click_center(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             print x, y
             self.center = [x, y]
 
-    def init_manual(self, rg, scale):
+    def init_manual(self, rg):
+        scale = 620
         # get the correct jaw and plot
         img = self.get_img(rg)
         cv2.imshow('choose', img)
@@ -29,7 +30,7 @@ class ManualInit(object):
 
         # plot the result of the click
         img = self.plot_result(img, scale)
-        return Landmark.Landmark(img, self.mean_shape.tooth_nb)
+        return self.center, scale, 0, Landmark.Landmark(img, self.mean_shape.tooth_nb)
 
 
     def plot_result(self, img, scale):

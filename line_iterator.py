@@ -3,13 +3,17 @@ import matplotlib.pyplot as plt
 
 
 def get_derivates(a, centre, img, nb_pixels):
-    ins = get_intensities(a, centre, img, nb_pixels)
+    values = get_intensities(a, centre, img, 2*nb_pixels+3)
+    ins = values[:, 2]
     d1 = ins[1:]-ins[:-1]
     d2 = ins[:-1] - ins[1:]
     g = d1-d2
+    g = g[:-1]
     norm = np.sum(np.abs(g))
     g = g / norm
-    return g
+    values = values[1:-1]
+    values[:, 2] = g
+    return values
 
 
 def get_intensities(a_normal, centre, img, nb_pixels):
@@ -34,7 +38,6 @@ def filter(intensities, nb_pixels):
     ins = intensities[del_s:-del_s, :]
     if len(ins) > nb_pixels:
         ins = ins[:-1]
-    print len(ins)
     return ins
 
 

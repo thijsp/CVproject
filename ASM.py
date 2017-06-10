@@ -5,19 +5,23 @@ import cv2
 import intitmanual
 import ProcustesAnalysis
 from sklearn.decomposition import PCA
+import grey_model
 
 
 class ASM(object):
 
-    def __init__(self, org_landmarks):
+    def __init__(self, org_landmarks, radiographs):
         self.org_landmarks = org_landmarks
         self.tooth_nb = self.org_landmarks[0].tooth_nb
+        self.rgs = radiographs
+        self._build_model()
 
-    def build_model(self):
+    def _build_model(self):
         mean, shapes = self.gpa(self.org_landmarks)
         self.mean_shape = mean
         self.aligned_shapes = shapes
         self.PCA(shapes)
+        self.grey_model = grey_model.GreyLevel(self.org_landmarks, self.rgs)
 
     def gpa(self, landmarks):
         return ProcustesAnalysis.GPA(landmarks)
@@ -42,16 +46,17 @@ class ASM(object):
         self.eigvectors = np.array(eigvectors)
 
     def fit(self, rg, automatic):
-        if automatic:
-            init = self.fit_automatic(rg)
-        else:
-            init = self.fit_manual(rg)
+        #if automatic:
+        #    init = self.fit_automatic(rg)
+        #else:
+        #    init = self.fit_manual(rg)
         self.train()
+        #return init
 
 
     def fit_manual(self, rg):
         scale = self.get_avg_norm()
-        man = intitmanual.ManualInit(self, self.mean_shape, self.tooth_nb)
+        man = intitmanual.ManualInit(self, self.tooth_nb)
         return man.init_manual(rg, scale)
 
     def get_avg_norm(self):
@@ -77,8 +82,15 @@ class ASM(object):
         #    reconstructed = self.reconstruct(self.aligned_shapes[i].to_vector(), self.b[i])
         #    self.plot_reconstructed(self.aligned_shapes[i].to_vector(), reconstructed)
 
-    def get_deviation(self, aligned, mean):
-        T = aligned
+    def estimate_model_params(self, landmark):
+        x = self.mean_shape.to_vector()
+        y = self.get_deviation([landmark], x)
+        b = self.get_b(self.eigvectors, y)
+        return self.constraint_b(b)
+
+
+    def get_deviation(self, shape, mean):
+        T = shape
         x = mean
 
         #y = np.array([np.power(t.to_vector() - x, 2) for t in T])
@@ -90,10 +102,22 @@ class ASM(object):
         U, S, V = pca._fit(Q)
         return np.array([np.dot(np.dot(np.dot(V.T, np.diag(S)), U.T).T, diff) for diff in y])
 
-    def reconstruct(self, shape, b):
-        return self.mean_shape.to_vector() + np.dot(self.eigvectors.T, b)
+    def reconstruct(self, b):
+        return self.mean_shape.to_vector() + np.dot(self.eigvectors.T, b.T).T
 
     def plot_reconstructed(self, tooth, reconstructed):
         plt.scatter(tooth[:40], tooth[40:])
         plt.scatter(reconstructed[:40], reconstructed[40:])
         plt.show()
+
+    def search_profile(self, estimate, new_rg):
+        landmark = self.grey_model.fit_profile(estimate, new_rg)
+        return landmark
+
+    def constraint_b(self, b):
+        constraints = 1.96 * np.sqrt(self.eigvals)
+        abs_b = np.abs(b)
+        abs_const = np.abs(constraints)
+        signs = np.sign(b)
+        m = np.vstack((abs_b, [abs_const]))
+        return signs * np.min(m, axis=0)

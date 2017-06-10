@@ -23,7 +23,7 @@ def GPA(landmarks):
 
 
 def align(example, mean_shape):
-    t, s, theta = get_parameters(example, mean_shape)
+    _, s, theta = get_parameters(example, mean_shape)
 
     example = example.rotate(theta)
     example = example.scale(s)
@@ -32,9 +32,9 @@ def align(example, mean_shape):
     return Landmark.Landmark(vec*(1.0/scale_fac), example.tooth_nb)
 
 
-def get_parameters(example, mean_shape):
-    example = example.to_vector()
-    mean_shape = mean_shape.to_vector()
+def get_parameters(example_l, mean_shape_l):
+    example = example_l.to_vector()
+    mean_shape = mean_shape_l.to_vector()
 
     x_length = len(mean_shape)//2
 
@@ -53,6 +53,8 @@ def get_parameters(example, mean_shape):
     s = np.sqrt(a**2 + b**2)
     theta = np.arctan(b/a)
     t = cen_mean - ex_mean
+
+    #t = mean_shape_l.get_center() - example_l.get_center()
 
     return t, s, theta
 

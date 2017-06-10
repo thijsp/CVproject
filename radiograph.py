@@ -18,7 +18,7 @@ class Radiograph(object):
         #self.img = self.resize(1200, 800)
         self.img = self.to_gray()
         self.roi = preprocessing.get_roi(self.img)
-        self.boundary_size = 100
+        self.boundary_size = 50
         self.upper, self.lower, self.middle = self.get_jaws(self.boundary_size)
 
     def show(self):
@@ -30,10 +30,10 @@ class Radiograph(object):
 
     def get_jaws(self, boundary_size):
         img = self.roi
-        img = preprocessing.preprocess(img)
+        #img = preprocessing.preprocess(img)
         upper, lower, middle = split.split(img, boundary_size)
-        #upper = preprocessing.preprocess(upper)
-        #lower = preprocessing.preprocess(lower)
+        upper = preprocessing.preprocess(upper)
+        lower = preprocessing.preprocess(lower)
         return upper, lower, middle
 
     def resize(self, width, height):
