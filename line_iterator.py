@@ -5,13 +5,16 @@ import matplotlib.pyplot as plt
 def get_derivates(a, centre, img, nb_pixels):
     values = get_intensities(a, centre, img, nb_pixels)
     ins = values[:, 2]
-    g = ins[1:-1]
-    #d1 = ins[1:]-ins[:-1]
-    #d2 = ins[:-1] - ins[1:]
-    #g = d1-d2
-    #g = g[:-1]
-    norm = np.sum(np.abs(g))
-    g = g / norm
+    #g = ins[1:-1]
+    ins[ins==0] = 1 # Avoid dividing by zero
+    d1 = (ins[1:]-ins[:-1]) / ins[:-1]    # Percentage change in intensity => gradient to the right
+    d2 = (ins[:-1] - ins[1:]) / ins[1:]   # Percentage change in intensity => gradient to the left
+    g = d1[1:] + d2[:-1] # Added sum instead of minus as gradient vectors should be added up to get the resulting gradient vector. Indexes were added to ensure gradients related to the same pixel are added.
+    if np.isnan(g).any():
+        pass
+    g = g / np.sum(np.abs(g))
+    #norm = np.sum(np.abs(g))
+    #g = g / norm
     values = values[1:-1]
     values[:, 2] = g
     return values
@@ -29,11 +32,17 @@ def get_intensities(a_normal, centre, img, nb_pixels):
     x_2 = x_c - x_d
     y_2 = y_c - y_d
 
+    if x_1 > x_2:
+        x_1, y_1, x_2, y_2 = x_2, y_2, x_1, y_1
+
     #intensities = createLineIterator([x_1, y_1], [x_2, y_2], img)
-    intensities1 = createLineIterator(centre, [x_1, y_1],  img)
+    intensities1 = createLineIterator(centre, [x_1, y_1], img)
     intensities2 = createLineIterator(centre, [x_2, y_2], img)
     ins1 = filter(intensities1, nb_pixels+1)
     ins2 = filter(intensities2, nb_pixels+1)
+    ins1 = arrange(ins1, a)
+    ins2 = arrange(ins2, a)
+
     ins_c = np.array([[centre[0], centre[1], img[int(centre[1]), int(centre[0])]]])
     ins = np.vstack((ins1, ins_c, ins2))
     return ins
@@ -42,6 +51,18 @@ def filter(intensities, nb_pixels):
     nb_del = len(intensities) - nb_pixels
     del_s = int(nb_del)
     return intensities[:-del_s]
+
+def arrange(intensities, a_normal): # Arrange array so that the middle pixel (next to the center) does not get deleted in the calculation of gradients
+    if intensities.size == 0:
+        pass
+    if a_normal == float('inf'):
+        if intensities[0, 1] > intensities[-1, 1]:
+            intensities = intensities[::-1]
+    else:
+        if intensities[0, 0] > intensities[-1, 0]:
+            intensities = intensities[::-1]
+
+    return intensities
 
 
 # def filter(intensities, nb_pixels):
@@ -83,7 +104,7 @@ def createLineIterator(P1, P2, img):
     #dYa = 25
 
     #predefine numpy array for output based on distance between points
-    itbuffer = np.empty(shape=(np.maximum(int(dYa),int(dXa)),3),dtype=np.float32)
+    itbuffer = np.empty(shape=(np.maximum(dXa, dYa), 3),dtype=np.float32)
     itbuffer.fill(np.nan)
 
     #Obtain coordinates along the line using a form of Bresenham's algorithm
@@ -94,13 +115,13 @@ def createLineIterator(P1, P2, img):
         if negY:
             itbuffer[:,1] = np.arange(P1Y - 1,P1Y - dYa - 1,-1)
         else:
-            itbuffer[:,1] = np.arange(P1Y+1,P1Y+dYa+1)
+            itbuffer[:,1] = np.arange(P1Y+1,P1Y+dYa+1, 1)
     elif P1Y == P2Y: #horizontal line segment
         itbuffer[:,1] = P1Y
         if negX:
             itbuffer[:,0] = np.arange(P1X-1,P1X-dXa-1,-1)
         else:
-            itbuffer[:,0] = np.arange(P1X+1,P1X+dXa+1)
+            itbuffer[:,0] = np.arange(P1X+1,P1X+dXa+1, 1)
     else: #diagonal line segment
         steepSlope = dYa > dXa
         if steepSlope:
@@ -108,26 +129,33 @@ def createLineIterator(P1, P2, img):
             if negY:
                 itbuffer[:,1] = np.arange(P1Y-1,P1Y-dYa-1,-1)
             else:
-                itbuffer[:,1] = np.arange(P1Y+1,P1Y+dYa+1)
+                itbuffer[:,1] = np.arange(P1Y+1,P1Y+dYa+1, 1)
             itbuffer[:,0] = (slope*(itbuffer[:,1]-P1Y)).astype(np.int) + P1X
         else:
             slope = float(dY)/float(dX)
             if negX:
                 itbuffer[:,0] = np.arange(P1X-1,P1X-dXa-1,-1)
             else:
-                itbuffer[:,0] = np.arange(P1X+1,P1X+dXa+1)
+                itbuffer[:,0] = np.arange(P1X+1,P1X+dXa+1, 1)
             itbuffer[:,1] = (slope*(itbuffer[:,0]-P1X)).astype(np.int) + P1Y
 
     #Remove points outside of image
     colX = itbuffer[:,0]
     colY = itbuffer[:,1]
-    itbuffer = itbuffer[(colX >= 0) & (colY >=0) & (colX<imageW) & (colY<imageH)]
 
+    img_in = itbuffer[(colX >= 0) & (colY >=0) & (colX<imageW) & (colY<imageH)]
+    img_out = itbuffer[(colX < 0) | (colY < 0) | (colX > imageW) | (colY > imageH)]
     #Get intensities from img ndarray
-    itbuffer[:,2] = img[itbuffer[:,1].astype(np.uint),itbuffer[:,0].astype(np.uint)]
+    img_in[:, 2] = img[img_in[:,1].astype(np.uint),img_in[:,0].astype(np.uint)]
+    img_out[:, 2] = 0
+
+    if img_out.size > 0:
+        itbuffer = np.vstack((img_in, img_out))
+        itbuffer = itbuffer[itbuffer[:, 0].argsort()]
+    else:
+        itbuffer = img_in
 
     return itbuffer
-
 
 def get_normal(landmark, l):
     if l == 0:
@@ -147,12 +175,14 @@ def get_normal(landmark, l):
 
     # normal a -> -a, through l
     x, y = landmark.landmarks[l]
-    if np.abs(a) > 10 ** 10:
-        a = a
+    if np.abs(a) > 3.5 or (x2 - x1) == 0: #10 ** 10:
+        #a = a
+        a = float('inf')
         # no b
         b = 0
-    elif np.abs(a) < 10 ** (-10):
-        a = float('inf')
+    elif np.abs(a) < 0.6: #10 ** (-10):
+        #a = float('inf')
+        a = 0
         b = y1
     else:
         a = -1.0 / a

@@ -25,7 +25,6 @@ class GreyLevel(object):
         g = []
         for l in range(len(landmark.landmarks)):
             g.append(self.sample_point(landmark, jaw, l, nb_pixels))
-        g = np.array(g)
         return np.array(g)
 
     def sample_point(self, landmark, img, l, nb_pixels):
@@ -74,8 +73,8 @@ class GreyLevel(object):
         i_1 = i_2.T
         inv_cov = np.linalg.inv(self.model_cov[landmark_idx])
         f_gs = np.dot(np.dot(i_1, inv_cov), i_2)
-        if distance > 10:
-            f_gs = float('inf')
+        #if distance > 10:
+        #    f_gs = float('inf')
 
         return f_gs
 

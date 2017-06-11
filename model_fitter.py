@@ -23,7 +23,7 @@ class Fitter(object):
         estimate = landmark
         while True:
             next_landmark = self.asm.search_profile(estimate, self.rg)
-            _, s, theta, b_next = self.calculate_b(next_landmark)
+            t, s, theta, b_next = self.calculate_b(next_landmark)
 
             if (b_next - b < 10 ** (-8)).all():
                 b = b_next
@@ -33,7 +33,7 @@ class Fitter(object):
                 estimate = Landmark.Landmark(self.asm.reconstruct(b)[0], self.asm.tooth_nb)
                 estimate_new = self.project(t, s, theta, estimate)
                 _, ax = plt.subplots()
-                ax.imshow(self.rg.lower, cmap='gray')
+                ax.imshow(self.rg.upper, cmap='gray')
                 estimate.plot(ax)
                 estimate_new.plot(ax)
                 plt.show()
@@ -69,7 +69,7 @@ class Fitter(object):
 
 
 if __name__ == '__main__':
-    j = 6
+    j = 1
     landmarks = []
     rgs = []
     for i in np.arange(1, 15, 1):
