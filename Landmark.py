@@ -42,7 +42,9 @@ class Landmark(object):
         return landmark
 
     def transform_to_point(self, point):
-        return self.transform_to_center(point)
+        landmark = self.landmarks + point
+        return Landmark(landmark, self.tooth_nb)
+        #return self.transform_to_center(point)
 
     def transform_to_center(self, center):
         #landmark = self.landmarks + center
@@ -114,7 +116,7 @@ class Landmark(object):
 
 
 if __name__ == '__main__':
-    landmark = Landmark([13, 3], 3)
+    landmark = Landmark([13, 2], 2)
     l = landmark.to_vector()
     radiograph_path = 'Data/Radiographs/0' + str(1) + '.tif'
     rg = radiograph.Radiograph([13])

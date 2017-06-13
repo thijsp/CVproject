@@ -1,5 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import preprocessing
+
+
+def get_derivates_test(a, centre, img, nb_pixels):
+    img_sobel = preprocessing.togradient_sobel(img)
+    intens = get_intensities(a, centre, img, nb_pixels)[1:-1, :]
+    values = get_intensities(a, centre, img_sobel, nb_pixels)[1:-1, :]
+    ins =  values[:, 2]
+    ins[ins == 0] = 1
+    fac = np.sum(np.abs(intens[:, 2]))
+    for i in range(len(ins)):
+        values[i, 2] = ins[i] * 1.0 / fac
+    return values
+
+
 
 
 def get_derivates(a, centre, img, nb_pixels):

@@ -43,7 +43,7 @@ class Radiograph(object):
         return img
 
     def get_tooth_img(self, tooth_nb):
-        if tooth_nb < 4:
+        if tooth_nb < 5:
             return self.upper
         else:
             return self.lower
