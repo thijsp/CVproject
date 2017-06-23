@@ -150,12 +150,6 @@ def split_processing(img):
     return img
 
 def togradient_sobel(img):
-    """Applies the Sobel Operator.
-    Args:
-        img: A grayscale dental x-ray image.
-    Returns:
-        An image with the detected edges bright on a darker background.
-    """
     img = cv2.GaussianBlur(img,(3,3),0)
     sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
     sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
