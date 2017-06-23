@@ -3,6 +3,7 @@ import cv2
 import radiograph
 import matplotlib.pyplot as plt
 import preprocessing
+import seaborn as sns
 
 
 def upper(radiograph, l, b):
@@ -18,6 +19,11 @@ def split(radiograph, boundary_size):
     #hist = cv2.calcHist(radiograph, [0], None, [256], [0, 256])
     pre_img = preprocessing.split_processing(radiograph)
     l = middle_idx(pre_img)
+    #with sns.axes_style("white"):
+    #    plt.imshow(upper(radiograph, l, boundary_size), cmap='gray')
+    #    plt.show()
+    #    plt.imshow(lower(radiograph, l, boundary_size), cmap='gray')
+    #    plt.show()
     return upper(radiograph, l, boundary_size), lower(radiograph, l, boundary_size), l
 
 

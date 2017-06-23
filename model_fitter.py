@@ -7,6 +7,8 @@ import ASM
 import intitmanual
 import ProcustesAnalysis
 import intitmanual
+import seaborn as sns
+sns.set_style("dark")
 
 
 class Fitter(object):
@@ -23,7 +25,7 @@ class Fitter(object):
         estimate = landmark
         while True:
             next_landmark = self.asm.search_profile(estimate, self.rg)
-            t, s, theta, b_next = self.calculate_b(next_landmark)
+            _, s, theta, b_next = self.calculate_b(next_landmark)
 
             if (b_next - b < 10 ** (-8)).all():
                 b = b_next
@@ -34,7 +36,6 @@ class Fitter(object):
                 estimate_new = self.project(t, s, theta, estimate)
                 _, ax = plt.subplots()
                 ax.imshow(self.rg.upper, cmap='gray')
-                estimate.plot(ax)
                 estimate_new.plot(ax)
                 plt.show()
                 estimate = estimate_new
@@ -43,15 +44,17 @@ class Fitter(object):
     def calculate_b(self, estimate):
         estimate_org = estimate.transform_origin()
         t, s, theta = ProcustesAnalysis.get_parameters(estimate_org, self.asm.mean_shape)
-        print (t, s, theta)
+        #print (t, s, theta)
         proj_landmark = self.project(t, s, theta, estimate_org)
         tangent_landmark = self.tangent(proj_landmark, self.asm.mean_shape)
         b_next = self.asm.estimate_model_params(tangent_landmark)
+        #t_m, s, theta = ProcustesAnalysis.get_parameters(self.asm.mean_shape, estimate_org)
         t_m, s, theta = ProcustesAnalysis.get_parameters(self.asm.mean_shape, estimate_org)
         #print self.asm.mean_shape.get_center()
         #print t
         t = estimate.get_center()
-        print (t, s, theta)
+        #print (t_m, s, theta)
+        #print t
         return t + t_m, s, theta, b_next
 
     def project(self, t, s, theta, estimate):
@@ -73,9 +76,11 @@ if __name__ == '__main__':
     landmarks = []
     rgs = []
     for i in np.arange(1, 15, 1):
-        rgs.append(radiograph.Radiograph([i]))
+        rg = radiograph.Radiograph([i])
+        rgs.append(rg)
         landmarks.append(Landmark.Landmark(mark=[i, j], tooth_nb=j))
     asm = ASM.ASM(landmarks, rgs)
     est = asm.fit(rgs[0], False)
-    fitter = Fitter(asm, rgs[0])
+    rg_test = radiograph.Radiograph([18])
+    fitter = Fitter(asm, rg_test)
     fitter.fit_new()

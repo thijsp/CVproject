@@ -16,9 +16,12 @@ class GreyLevel(object):
 
     def _build_model(self):
         g = []
+        plt.figure()
+        #plt.imshow(self.rgs[0], cmap='gray')
         for i in range(len(self.landmarks)):
             landmark, jaw = self.get_example(self.landmarks[i], self.rgs[i])
-            g.append(self.get_sample(landmark, jaw, self.nb_pixels)[:, :, 2])
+            sample = self.get_sample(landmark, jaw, self.nb_pixels)
+            g.append(sample[:, :, 2])
         return np.array(g)
 
     def get_sample(self, landmark, jaw, nb_pixels):
@@ -42,7 +45,7 @@ class GreyLevel(object):
         cov = []
         for i in range(40):
             p = g[:, i, :]
-            mu.append(np.mean(p))
+            mu.append(np.mean(p, axis=0))
             cov.append(np.cov(p.T))
         return np.array(mu), np.array(cov)
 

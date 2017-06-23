@@ -21,6 +21,7 @@ class Radiograph(object):
         self.boundary_size = 50
         self.upper, self.lower, self.middle = self.get_jaws(self.boundary_size)
 
+
     def show(self):
         print self.img.shape
         Plot.plot_image_gray(self.img)

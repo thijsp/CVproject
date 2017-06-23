@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import preprocessing
 
 
-def get_derivates_test(a, centre, img, nb_pixels):
+def get_derivates(a, centre, img, nb_pixels):
     img_sobel = preprocessing.togradient_sobel(img)
     intens = get_intensities(a, centre, img, nb_pixels)[1:-1, :]
     values = get_intensities(a, centre, img_sobel, nb_pixels)[1:-1, :]
@@ -17,7 +17,7 @@ def get_derivates_test(a, centre, img, nb_pixels):
 
 
 
-def get_derivates(a, centre, img, nb_pixels):
+def get_derivates_old(a, centre, img, nb_pixels):
     values = get_intensities(a, centre, img, nb_pixels)
     ins = values[:, 2]
     #g = ins[1:-1]
@@ -38,7 +38,7 @@ def get_derivates(a, centre, img, nb_pixels):
 def get_intensities(a_normal, centre, img, nb_pixels):
     x_c, y_c = centre
     a = a_normal
-    theta = np.arctan(a)
+    theta = np.arctan(a)#+np.pi/2
     dist = 3.0*nb_pixels
     x_d = np.cos(theta) * dist
     y_d = np.sin(theta) * dist
@@ -192,12 +192,14 @@ def get_normal(landmark, l):
     x, y = landmark.landmarks[l]
     if np.abs(a) > 3.5 or (x2 - x1) == 0: #10 ** 10:
         #a = a
-        a = float('inf')
+        #a = float('inf')
+        a = 0
         # no b
         b = 0
     elif np.abs(a) < 0.6: #10 ** (-10):
         #a = float('inf')
-        a = 0
+        #a = 0
+        a = float('inf')
         b = y1
     else:
         a = -1.0 / a

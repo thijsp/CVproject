@@ -127,7 +127,7 @@ def preprocess(img):
     img = cv2.subtract(img, img_bottom)
 
     img = clahe(img)
-    img = togradient_sobel(img)
+    #img = togradient_sobel(img)
 
     #img = canny(img, 50, 60)
 
@@ -164,8 +164,11 @@ def togradient_sobel(img):
     return cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
 
 
+
+
 if __name__ == '__main__':
     img = cv2.imread('Data/Radiographs/01.tif')
+    i = get_roi(img)
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = img_grey
 

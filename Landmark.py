@@ -101,10 +101,11 @@ class Landmark(object):
         landmarks = self.landmarks - [x, y]
         return Landmark(landmarks, self.tooth_nb)
 
-    def plot(self, axis):
+    def plot(self, axis, color='blue'):
         if axis is None:
             _, axis = plt.subplots()
-        axis.scatter(self.landmarks[:, 0], self.landmarks[:, 1])
+        axis.scatter(self.landmarks[:, 0], self.landmarks[:, 1], color=color)
+        return axis
 
     def no_root(self):
         points = self.landmarks[10:30,:]

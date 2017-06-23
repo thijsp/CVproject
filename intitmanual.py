@@ -18,11 +18,11 @@ class ManualInit(object):
             self.center = [x, y]
 
     def init_manual(self, rg):
-        scale = 620
+        scale = 520
         # get the correct jaw and plot
         img = self.get_img(rg)
         cv2.imshow('choose', img)
-        plt.show()
+        #plt.show()
 
         cv.SetMouseCallback('choose', self.__click_center)
         cv2.waitKey(0)
@@ -32,7 +32,6 @@ class ManualInit(object):
         landmark = self.plot_result(img, scale)
         return self.center, scale, 0, landmark
 
-
     def plot_result(self, img, scale):
         mean_shape = self.mean_shape.transform_unit()
         mean_shape = mean_shape.scale(scale)
@@ -41,9 +40,12 @@ class ManualInit(object):
         pimg = np.array([(int(p[0]), int(p[1])) for p in points])
         new_shape = Landmark.Landmark(pimg, mean_shape.tooth_nb)
 
-        plt.imshow(img, cmap='gray')
-        cv2.polylines(img, [pimg], True, (0, 255, 0))
-        plt.show()
+        _, ax = plt.subplots()
+        ax.imshow(img, cmap='gray')
+        #cv2.polylines(img, [pimg], True, (0, 255, 0))
+        new_shape.plot(ax)
+        ax.set_title('init')
+        #plt.show()
 
         return new_shape
 
